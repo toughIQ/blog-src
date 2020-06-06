@@ -1,0 +1,103 @@
+{:title "Learings from Kafka The Definitive Guide"
+ :description "Learning from reading Kafka - The Definitive Guide"
+ :layout
+ :post
+ :tags ["Kafka", "OpenShift", "RedHat"]
+ :toc false
+ :author "Toni Schmidbauer"
+}
+
+// Asciidoc Parameters
+// toc is set here since I like unnumbered tocs more
+:icons: font
+:linkattrs:
+:toc: macro
+
+[.small]
+_Last Modified: {docdatetime}_
+// Asciidoc Parameters END
+
+Notes and learning from reading Kafka The Definitive Guide.
+
+== Chapter 1
+
+*Message*: A message is like a database row. It's a array of bytes
+ without special meaning to Kafka. Messages are written in batches
+ produced to the same topic and partition. Larger batches means more
+ throughput but higher latency.
+
+*Key*: Optional metadata for a *Message*. Array of bytes without
+ meaning. Keys are used to partition data.
+
+*Schema*: *Messages* are obaque, but a schema imposed on the message
+ content is recommended. JSON, XML are ok but typing is weak. Apache
+ Avro is recommended
+
+*Topic*: A topic is like a database table.
+
+*Partition*: *Topics* are broken into partitions. A *partition* is
+ like a commit log. Messages are always appended to the
+ partition. There is _no_ time ordering of messages between
+ partition. Only within a partition messages are ordered.
+ *Partitions* can be hosted on different servers. A partition is owned
+ by a single *Broker* in the *Cluster*. A partition can be assigned to
+ multiple *brokers*, which results in a replicated partition.
+
+*Producer*: produces new messages. Does not care to which partition
+ the messages is redirected. *Producer* can direct messages to
+ specific partitions based on the hash of a key. This is done by a
+ *partitioner*. All producers are assigned to a leader.
+
+*Consumer*: Can read messages. Keeps track of messages read by an
+ offset. Work as part of a consumer group. All consumers are assigned
+ to a leader.
+
+*Offset*: A piece of metadata (integer) Kafka adds to each
+ message. Used by the *Consumer*. Each message in a partition as a
+ unique offset. Zookeeper or Kafka store offset of last message
+ consumed so a *consumer* can restart without losing its place.
+
+*Consumer group*: A group of consumers. Group ensures that a message
+ is only consumed by one member of the group. The mapping of a
+ partition to a consumer is called ownership.  Consumer can scale
+ horizontally. If a consume fails another consumer in the group takes
+ ownership of the partition.
+
+*Broker*: A single Kafka server. Receives messages from *producers*
+ assigns an *offset* and commit messages to disk. It serves *consumers*.
+
+*Cluster*: *Brokers* are assign to a cluster. Within a cluster on
+ broker is the controller.
+
+*Controller*: Responsible for administrative tasks. Assigns
+ *partitions* to brokers, monitors for broker failures.
+
+*Retention*: Kakfa retains messages for a certain amount of time or
+ until a topic reaches a certain size. Different topics can have
+ different retention settings. Topics can also be configured as
+ *log-compact*, which means only the *last* message produced will be
+ retained.
+
+*MirrorMaker*: used to replicated clusters between datacenters.
+
+== Chapter 2
+
+*Zookeeper*: A zookeeper cluster is called an _ensemble_. A odd number
+ of nodes is required. Not more then seven nodes are
+ recommended. Current versions of Kafka will drop zookeeper.
+
+=== Zookeeper config
+
+*initLimit*: Max time for followers to connect to leader.
+
+*syncLimit*: How out of sync followers can be with the leader
+
+*tickTime*: initLimit and syncLimit are a number of unit of tickTime
+
+Clients connect to cluster via the *clientPort*. Members of an
+ensemble connect to each other via *peerPort*. Leader collection is
+performed via the *leaderPort*.
+
+*myId*: is a little bit unclear... Each server needs a *myId* file in
+ *dataDir*. It contains the ID of the server and must match the config
+ file.
