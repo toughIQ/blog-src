@@ -101,3 +101,30 @@ performed via the *leaderPort*.
 *myId*: is a little bit unclear... Each server needs a *myId* file in
  *dataDir*. It contains the ID of the server and must match the config
  file.
+
+== Chapter 5 (Internals)
+
+* Kafka uses zookepers ephemeral node feature
+* Broker needs a unique id
+* If old broker is lost an a new broker with same ID joins, it will join with the same partitions and topics assigned
+
+=== Controller
+
+* Elects partition leaders
+* Is an zookeeper ephemeral node called /controller
+* Responsible for assigning a leader to partition
+
+=== Replication
+
+* Partitions are replicated between brokers (replica count)
+* One Leader per partition, serves client requests (producer/consumer)
+* Other replicas are followers and just copy data from the leader
+* Acts like a consumer, uses Fetch with next offset ID requests to sync data from leader
+* Always request messages always in order
+* Leader knows how far behind followers are because it gets requests with the next offset ID
+* If follower is to far behind (out of sync) it cannot become the next leader
+* replica.lag.time.max.ns specifies how far behind replicas can be
+
+* Partitions have a preferred leader, this is the leader when the topic was created
+* Preferred because leader are evently distributed between brokers
+* auto.leader.repbalance.enable=true will make sure that the prefered leader is re-elected in case it is not the current leader
