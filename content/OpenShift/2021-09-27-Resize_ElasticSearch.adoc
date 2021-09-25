@@ -1,6 +1,6 @@
 --- 
-title: "Online Resize Elasticsearch Storage"
-description: "Resize ElasticSearch Storage online and without service disruption"
+title: "Resize Elasticsearch Storage w/o dataloss"
+description: "Resize ElasticSearch Storage online without dataloss"
 date: "2021-09-27"
 doctype: book
 
